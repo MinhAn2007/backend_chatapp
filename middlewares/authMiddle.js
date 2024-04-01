@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
-
+// chua xai , dung de test phan quyen cho chuc nang chat nhom
 
 exports.auth = (req,res,next)=>{
     try {
