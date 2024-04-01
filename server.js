@@ -1,4 +1,5 @@
 const express = require('express')
+const cors = require('cors');
 
 const app = express()
 
@@ -7,13 +8,12 @@ const PORT = process.env.PORT || 3000
 
 app.use(express.json())
 
-//calling Database function
+app.use(cors());
+
 require('./config/database').connect()
 
-//route importing and mounting
 const user = require('./routes/user')
 
-// Mount the user routes
 app.use('/user', user)
 
 app.listen(PORT, ()=>{

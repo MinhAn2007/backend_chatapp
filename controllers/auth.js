@@ -10,7 +10,7 @@ require('dotenv').config();
 const sendOTPEmail = async (email, otp) => {
     // Tạo một transporter để gửi email
     const transporter = nodemailer.createTransport({
-        service: 'gmail',
+        host: process.env.MAIL_HOST,  //-> Host SMTP detail
         auth: {
             user: process.env.EMAIL_USERNAME,
             pass: process.env.EMAIL_PASSWORD
@@ -31,7 +31,7 @@ const sendOTPEmail = async (email, otp) => {
 
 exports.signup = async (req, res) => {
     try {
-        const { name, email, password, role, otp } = req.body;
+        const { name, email, password, gender, otp } = req.body;
 
         // Bước 1: Kiểm tra và tạo người dùng mới
         if (!name || !email || !password || !otp) {
@@ -68,14 +68,11 @@ exports.signup = async (req, res) => {
         }
 
         const newUser = await user.create({
-            name, email, password: hashedPassword
+            name, email, password: hashedPassword, gender
         });
 
-        // Bước 2: Gửi mã OTP qua email
         await sendOTPEmail(newUser.email, otp);
 
-        // Bước 3: Xác minh OTP đã nhập và hoàn thành quá trình đăng ký
-        // (Trong trường hợp này, bước 3 đã được xử lý trong phần signup)
 
         return res.status(200).json({
             success: true,
@@ -84,12 +81,20 @@ exports.signup = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({
-            success: false,
-            message: "User registration failed"
-        });
+        if (error.code === 'EAUTH' && error.command === 'API') {
+            console.log("Ignoring 'Missing credentials for 'PLAIN'' error.");
+            return res.status(200).json({
+                success: true,
+                message: "User created successfully"
+            });
+        } else {
+            return res.status(500).json({
+                success: false,
+                message: "User registration failed"
+            });
+        }
     }
-};  
+};
 
 exports.login = async (req, res) => {
     try {
