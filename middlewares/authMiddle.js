@@ -21,7 +21,7 @@ exports.auth = (req,res,next)=>{
         } catch (error) {
             return res.status(401).json({
                 success:false,
-                message: "invalid Token ⚠️"
+                message: "invalid Token "
             })
         }
 
@@ -30,7 +30,7 @@ exports.auth = (req,res,next)=>{
     } catch (error) {
         return res.status(401).json({
             success:false,
-            message: "Error Occured in Authentication ⚠️"
+            message: "Error Occured in Authentication "
         })
     }
 }
