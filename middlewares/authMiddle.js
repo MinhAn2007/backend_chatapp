@@ -1,12 +1,10 @@
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
-//auth, isSTudent, isAdmin
 
 
 exports.auth = (req,res,next)=>{
     try {
-        //extract JWT token
         const token = req.body.token || req.cookies.token
         if(!token){
             return res.status(401).json({
@@ -43,7 +41,7 @@ exports.isStudent = (req,res,next)=>{
         if(req.user.role !=="Student"){
             return res.status(401).json({
                 success:false,
-                message: "You are not authorized Student⚠️"
+                message: "You are not authorized Student"
             })
         }
 
@@ -51,7 +49,7 @@ exports.isStudent = (req,res,next)=>{
     } catch (error) {
         return res.status(500).json({
             success:false,
-            message: "Something error occured⚠️: "+error
+            message: "Something error occured: "+error
         })
     }
 }
@@ -61,7 +59,7 @@ exports.isAdmin = (req,res,next)=>{
         if(req.user.role !=="Admin"){
             return res.status(401).json({
                 success:false,
-                message: "You are not authorized Admin⚠️"
+                message: "You are not authorized Admin"
             })
         }
 
@@ -69,7 +67,7 @@ exports.isAdmin = (req,res,next)=>{
     } catch (error) {
         return res.status(500).json({
             success:false,
-            message: "Something error occured⚠️: "+error
+            message: "Something error occured: "+error
         })
     }
 }
