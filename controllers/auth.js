@@ -8,16 +8,14 @@ require('dotenv').config();
 
 // Hàm gửi email OTP
 const sendOTPEmail = async (email, otp) => {
-    // Tạo một transporter để gửi email
     const transporter = nodemailer.createTransport({
-        host: process.env.MAIL_HOST,  //-> Host SMTP detail
+        host: process.env.MAIL_HOST,
         auth: {
             user: process.env.EMAIL_USERNAME,
             pass: process.env.EMAIL_PASSWORD
         }
     });
 
-    // Nội dung email
     const mailOptions = {
         from: process.env.EMAIL_USERNAME,
         to: email,
@@ -25,7 +23,6 @@ const sendOTPEmail = async (email, otp) => {
         text: `Your OTP is: ${otp}`
     };
 
-    // Gửi email
     await transporter.sendMail(mailOptions);
 };
 
@@ -33,7 +30,6 @@ exports.signup = async (req, res) => {
     try {
         const { name, email, password, gender, otp } = req.body;
 
-        // Bước 1: Kiểm tra và tạo người dùng mới
         if (!name || !email || !password || !otp) {
             return res.status(403).send({
                 success: false,
@@ -57,15 +53,7 @@ exports.signup = async (req, res) => {
             });
         }
 
-        let hashedPassword;
-        try {
-            hashedPassword = await bcrypt.hash(password, 10);
-        } catch (error) {
-            return res.status(500).json({
-                success: false,
-                message: `Hashing password error: ${error.message}`
-            });
-        }
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = await user.create({
             name, email, password: hashedPassword, gender
@@ -73,14 +61,12 @@ exports.signup = async (req, res) => {
 
         await sendOTPEmail(newUser.email, otp);
 
-
         return res.status(200).json({
             success: true,
             newUser,
             message: "User created successfully"
         });
     } catch (error) {
-        console.error(error);
         if (error.code === 'EAUTH' && error.command === 'API') {
             console.log("Ignoring 'Missing credentials for 'PLAIN'' error.");
             return res.status(200).json({
