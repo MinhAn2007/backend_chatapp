@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
       },
+      avatar: {
+        type: String 
+    }
 })
 
 module.exports = mongoose.model('user', userSchema)
