@@ -11,6 +11,7 @@ exports.updateUser = async (req, res) => {
             });
         }
         const { name, gender, avatar } = req.body;
+
         if (name) foundUser.name = name;
         if (gender !== undefined) foundUser.gender = gender;
         if (avatar) foundUser.avatar = avatar; 
