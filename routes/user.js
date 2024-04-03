@@ -10,7 +10,7 @@ router.post('/login', login)
 router.post('/signup', signup)
 router.post('/sendotp', sendotp)
 router.put('/updateUser/:userId',auth, updateUser)
-
+router.post('/updatePassword/:userId', updateUser)
 //testing protected route
 router.get("/test",auth, (req,res)=>{
     res.json({
