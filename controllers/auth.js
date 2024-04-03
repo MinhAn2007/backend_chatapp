@@ -6,7 +6,14 @@ const otpGenerator = require("otp-generator");
 const nodemailer = require("nodemailer");
 require('dotenv').config();
 
-// Hàm gửi email OTP
+// Hàm gửi email OTP đến email
+/**
+ * Sends an email with the provided OTP (One-Time Password) to the specified email address.
+ *
+ * @param {string} email - The recipient's email address.
+ * @param {string} otp - The One-Time Password to be sent.
+ * @returns {Promise<void>} - A Promise that resolves when the email is sent successfully.
+ */
 const sendOTPEmail = async (email, otp) => {
     const transporter = nodemailer.createTransport({
         host: process.env.MAIL_HOST,
@@ -25,7 +32,7 @@ const sendOTPEmail = async (email, otp) => {
 
     await transporter.sendMail(mailOptions);
 };
-
+// hàm dùng để đăng kí
 exports.signup = async (req, res) => {
     try {
         const { name, email, password, gender, otp } = req.body;
@@ -81,7 +88,7 @@ exports.signup = async (req, res) => {
         }
     }
 };
-
+// hàm đăng nhập 
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;

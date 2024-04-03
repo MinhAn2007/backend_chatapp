@@ -5,7 +5,6 @@ const router = express.Router()
 const {login, signup, sendotp} = require("../controllers/auth")
 const {auth, isStudent, isAdmin} = require('../middlewares/authMiddle')
 const {updateUser, updatePassword} = require('../controllers/user')
-
 router.post('/login', login)
 router.post('/signup', signup)
 router.post('/sendotp', sendotp)
