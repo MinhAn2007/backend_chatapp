@@ -33,16 +33,20 @@ exports.updateUser = async (req, res) => {
 };
 
 exports.updatePassword = async (req, res) => {
+    console.log("qưeqweq");
+
     try {
-        const { userId } = req.params;
+        const { email } = req.params;
+
         const { currentPassword, newPassword } = req.body;
 
         // Tìm kiếm người dùng trong cơ sở dữ liệu
-        const foundUser = await User.findById(userId);
+        const foundUser = await User.findOne({ email: email });
         if (!foundUser) {
+
             return res.status(404).json({
                 success: false,
-                message: 'User not found',
+                message: 'User not found for email: ' + email,
             });
         }
 
@@ -50,6 +54,7 @@ exports.updatePassword = async (req, res) => {
         const isMatch = await bcrypt.compare(currentPassword, foundUser.password);
         if (!isMatch) {
             return res.status(400).json({
+
                 success: false,
                 message: 'Current password is incorrect',
             });

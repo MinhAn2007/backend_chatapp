@@ -4,13 +4,13 @@ const router = express.Router()
 //Handlers from controllers
 const {login, signup, sendotp} = require("../controllers/auth")
 const {auth, isStudent, isAdmin} = require('../middlewares/authMiddle')
-const {updateUser} = require('../controllers/user')
+const {updateUser, updatePassword} = require('../controllers/user')
 
 router.post('/login', login)
 router.post('/signup', signup)
 router.post('/sendotp', sendotp)
-router.put('/updateUser/:userId',auth, updateUser)
-router.post('/updatePassword/:userId', updateUser)
+router.put('/updatePassword/:email', updatePassword)
+router.put('/updateUser/:userId', updateUser)
 //testing protected route
 router.get("/test",auth, (req,res)=>{
     res.json({
