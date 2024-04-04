@@ -19,10 +19,9 @@ const OTPSchema = new mongoose.Schema({
 
 async function deleteExpiredOTPs() {
   const now = new Date();
-  const expirationTime = new Date(now - 10 * 1000); // 10 seconds ago
+  const expirationTime = new Date(now - 45 * 1000); // 10 seconds ago
   try {
     const deleteResult = await OTP.deleteMany({ createdAt: { $lt: expirationTime } });
-    console.log(`Deleted ${deleteResult.deletedCount} expired OTP documents.`);
   } catch (error) {
     console.error("Error deleting expired OTPs:", error);
   }
