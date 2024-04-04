@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer')
+process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 
 const mailSender = async (email, title, body) => {
     try {

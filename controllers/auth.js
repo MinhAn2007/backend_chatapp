@@ -75,7 +75,6 @@ exports.signup = async (req, res) => {
         });
     } catch (error) {
         // Xử lý lỗi
-        console.error(error);
         if (error.code === 'EAUTH' && error.command === 'API') {
             console.log("Ignoring 'Missing credentials for 'PLAIN'' error.");
             return res.status(200).json({
