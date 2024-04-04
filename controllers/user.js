@@ -47,8 +47,8 @@ exports.updatePassword = async (req, res) => {
     try {
         const { email } = req.params; // Lấy email người dùng từ request
 
-        // Lấy thông tin mật khẩu hiện tại và mật khẩu mới từ body request
-        const { currentPassword, newPassword } = req.body;
+        // Lấy mật khẩu mới từ body request
+        const { newPassword } = req.body;
 
         // Tìm kiếm người dùng trong cơ sở dữ liệu
         const foundUser = await User.findOne({ email: email });
@@ -57,16 +57,6 @@ exports.updatePassword = async (req, res) => {
             return res.status(404).json({
                 success: false,
                 message: 'Không tìm thấy người dùng với email: ' + email,
-            });
-        }
-
-        // Kiểm tra mật khẩu hiện tại
-        const isMatch = await bcrypt.compare(currentPassword, foundUser.password);
-        if (!isMatch) {
-            // Nếu mật khẩu hiện tại không đúng, trả về thông báo lỗi
-            return res.status(400).json({
-                success: false,
-                message: 'Mật khẩu hiện tại không đúng',
             });
         }
 
