@@ -136,8 +136,9 @@ exports.login = async (req, res) => {
 exports.sendotp = async (req, res) => {
     try {
         const { email } = req.body;
+        const {checkGetPassEmail} = req?.body;
         const checkUserPresent = await User.findOne({ email });
-        if (checkUserPresent) {
+        if (checkUserPresent && checkGetPassEmail) {
             // Nếu người dùng đã tồn tại trong cơ sở dữ liệu, trả về thông báo lỗi
             return res.status(401).json({
                 success: false,
