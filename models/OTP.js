@@ -22,6 +22,7 @@ async function deleteExpiredOTPs() {
   const expirationTime = new Date(now - 45 * 1000); // 10 seconds ago
   try {
     const deleteResult = await OTP.deleteMany({ createdAt: { $lt: expirationTime } });
+    console.log(`${deleteResult.deletedCount} expired OTPs deleted`);
   } catch (error) {
     console.error("Error deleting expired OTPs:", error);
   }
