@@ -60,8 +60,8 @@ exports.uploadAvatarS3 = async (req, res) => {
             }
 
             const { userId } = req.params; // Lấy id của người dùng từ request
-            const avatar = req.file?.originalname.split(".");
-            const fileType = avatar[avatar - 1];
+            const avatar = req.file?.originalname.split(".");// Lấy tên file ảnh và tách ra để lấy loại file
+            const fileType = avatar[avatar.length - 1]; // Lấy loại file từ tên file
             const filePath = `zalo/W${userId}_W${Date.now().toString()}.${fileType}`;
 
             const paramsS3 = {

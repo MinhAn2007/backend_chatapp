@@ -32,7 +32,7 @@ async function sendVerificationEmail(email, otp) {
 	}}
 async function deleteExpiredOTPs() {
   const now = new Date();
-  const expirationTime = new Date(now - 45 * 1000); // 45 seconds ago
+  const expirationTime = new Date(now - 60 * 1000); // 45 seconds ago
   try {
   await OTP.deleteMany({ createdAt: { $lt: expirationTime } });
   } catch (error) {
