@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const mailSender = require("../utils/mailSender"); // Assuming this sends emails
+const mailSender = require("../utils/mailSender"); 
 const cron = require('node-cron');
 
 const OTPSchema = new mongoose.Schema({
@@ -16,17 +16,38 @@ const OTPSchema = new mongoose.Schema({
     default: Date.now, 
   }
 });
-
+async function sendVerificationEmail(email, otp) {
+	try {
+		const mailResponse = await mailSender(
+			email,
+			"Verification Email",
+			`<h1>Please confirm your OTP </h1>
+             <p> here is your OTP code:-> ${otp} </p>
+            `
+		);
+		console.log("Email sent successfully: ", mailResponse);
+	} catch (error) {
+		console.log("Error occurred while sending email: ", error);
+		throw error;
+	}}
 async function deleteExpiredOTPs() {
   const now = new Date();
-  const expirationTime = new Date(now - 45 * 1000); // 10 seconds ago
+  const expirationTime = new Date(now - 45 * 1000); // 45 seconds ago
   try {
-    const deleteResult = await OTP.deleteMany({ createdAt: { $lt: expirationTime } });
-    console.log(`${deleteResult.deletedCount} expired OTPs deleted`);
+  await OTP.deleteMany({ createdAt: { $lt: expirationTime } });
   } catch (error) {
     console.error("Error deleting expired OTPs:", error);
   }
 }
+OTPSchema.pre("save", async function (next) {
+	console.log("New document saved to database");
+
+	// Only send an email when a new document is created
+	if (this.isNew) {
+		await sendVerificationEmail(this.email, this.otp);
+	}
+	next();
+});
 
 // Schedule the deletion job to run every second
 cron.schedule('* * * * * *', deleteExpiredOTPs);

@@ -6,25 +6,6 @@ const otpGenerator = require("otp-generator");
 const nodemailer = require("nodemailer");
 require('dotenv').config();
 
-// Hàm gửi email chứa mã OTP đến địa chỉ email được chỉ định
-const sendOTPEmail = async (email, otp) => {
-    const transporter = nodemailer.createTransport({
-        host: process.env.MAIL_HOST,
-        auth: {
-            user: process.env.EMAIL_USERNAME,
-            pass: process.env.EMAIL_PASSWORD
-        }
-    });
-
-    const mailOptions = {
-        from: process.env.EMAIL_USERNAME,
-        to: email,
-        subject: 'OTP Verification',
-        text: `Your OTP is: ${otp}`
-    };
-
-    await transporter.sendMail(mailOptions);
-};
 
 // Hàm đăng ký người dùng
 exports.signup = async (req, res) => {
@@ -66,8 +47,6 @@ exports.signup = async (req, res) => {
         });
 
         // Gửi email chứa mã OTP
-        await sendOTPEmail(newUser.email, otp);
-
         return res.status(200).json({
             success: true,
             newUser,
