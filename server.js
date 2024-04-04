@@ -19,5 +19,5 @@ app.use('/user', user)
 console.log(expressListEndpoints(app));
 
 app.listen(PORT, ()=>{
-    console.log("Server Started in ", PORT)
+    console.log("Server Started in", PORT)
 })
