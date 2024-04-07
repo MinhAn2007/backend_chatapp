@@ -30,15 +30,7 @@ async function sendVerificationEmail(email, otp) {
 		console.log("Error occurred while sending email: ", error);
 		throw error;
 	}}
-async function deleteExpiredOTPs() {
-  const now = new Date();
-  const expirationTime = new Date(now - 60 * 1000); // 45 seconds ago
-  try {
-  await OTP.deleteMany({ createdAt: { $lt: expirationTime } });
-  } catch (error) {
-    console.error("Error deleting expired OTPs:", error);
-  }
-}
+
 OTPSchema.pre("save", async function (next) {
 	console.log("New document saved to database");
 
@@ -50,7 +42,16 @@ OTPSchema.pre("save", async function (next) {
 });
 
 // Schedule the deletion job to run every second
-cron.schedule('* * * * * *', deleteExpiredOTPs);
+cron.schedule('*/60 * * * * *',   async function deleteExpiredOTPs() {
+  const now = new Date();
+  const expirationTime = new Date(now - 45 * 1000); // 45 seconds ago
+  try {
+    await OTP.deleteMany({ createdAt: { $lt: expirationTime } });
+    console.log("Expired OTPs deleted successfully.");
+  } catch (error) {
+    console.error("Error deleting expired OTPs:", error);
+  }
+});
 
 const OTP = mongoose.model("OTP", OTPSchema);
 

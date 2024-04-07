@@ -172,3 +172,57 @@ exports.updatePassword = async (req, res) => {
         });
     }
 };
+
+exports.resetPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        // Kiểm tra xem người dùng tồn tại trong cơ sở dữ liệu không
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        // Sinh mật khẩu mới ngẫu nhiên
+        const newPassword = Math.random().toString(36).slice(-8);
+
+        // Mã hóa mật khẩu mới
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Cập nhật mật khẩu mới cho người dùng trong cơ sở dữ liệu
+        user.password = hashedPassword;
+        await user.save();
+
+        // Gửi email chứa mật khẩu mới cho người dùng
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.MAIL_USER,
+                pass: process.env.MAIL_PASS
+            }
+        });
+
+        const mailOptions = {
+            from: process.env.MAIL_USER,
+            to: email,
+            subject: 'New Password',
+            text: `Your new password is: ${newPassword}`
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.error('Error sending email:', error);
+                return res.status(500).json({ success: false, message: 'Failed to send new password email' });
+            } else {
+                console.log('Email sent:', info.response);
+                return res.status(200).json({ success: true, message: 'New password sent to your email' });
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: 'Failed to reset password' });
+    }
+};
