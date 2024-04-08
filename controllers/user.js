@@ -302,5 +302,30 @@ module.exports.acceptFriendRequestAndSendMessage = async (req, res, next) => {
       next(error);
     }
   };
+// Tìm người dùng theo địa chỉ email
+module.exports.findUserByEmail = async (req, res, next) => {
+    try {
+        const { email } = req.params; // Lấy địa chỉ email từ request params
+        console.log(email);
+        // Tìm kiếm người dùng trong cơ sở dữ liệu
+        const user = await User.findOne({ email });
+
+        // Kiểm tra xem người dùng có tồn tại không
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy người dùng với địa chỉ email này'
+            });
+        }
+
+        // Trả về thông tin của người dùng nếu tìm thấy
+        return res.status(200).json({
+            success: true,
+            user: user
+        });
+    } catch (error) {
+        next(error);
+    }
+};
 
   
