@@ -355,4 +355,31 @@ module.exports.getFriendRequestsSentToUser = async (req, res, next) => {
     }
 };
 
-  
+exports.getFriendList = async (req, res, next) => {
+    try {
+        const { userId } = req.params; // Lấy id của người dùng từ request params
+
+        // Tìm kiếm người dùng trong cơ sở dữ liệu bằng id
+        const user = await User.findById(userId);
+
+        // Kiểm tra xem người dùng có tồn tại không
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy người dùng'
+            });
+        }
+
+        // Lấy danh sách bạn bè của người dùng
+        const friendList = await User.find({ _id: { $in: user.friends } });
+
+        // Trả về danh sách bạn bè
+        return res.status(200).json({
+            success: true,
+            friendList: friendList
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
