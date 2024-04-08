@@ -7,7 +7,6 @@ const { updateUser, updatePassword, uploadAvatarS3, resetPassword ,findUserByEma
     sendFriendRequest,acceptFriendRequestAndSendMessage,
     getFriendRequestsSentToUser} = require('../controllers/user')
 
-const { addMessage, getMessages } = require("../controllers/message");
 
 router.post('/login', login)
 router.post('/signup', signup)
@@ -18,8 +17,7 @@ router.post('/uploadAvatarS3/:userId', uploadAvatarS3)
 router.post('/resetPassword',resetPassword)
 router.get('/findUserByEmail/:email',findUserByEmail)
 router.get('/getFriendRequestsSentToUser/:userId',getFriendRequestsSentToUser)
-router.post("/addmsg/", addMessage);
-router.post("/getmsg/", getMessages);
+
 router.post("/sendFriendRequest/", sendFriendRequest);
 router.post("/acceptFriendRequestAndSendMessage/", acceptFriendRequestAndSendMessage);
 
