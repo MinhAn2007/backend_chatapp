@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt'); // Import thư viện bcrypt để mã hóa m�
 const multer = require('multer'); // Import thư viện multer để upload file
 const AWS = require('aws-sdk'); // Import thư viện aws-sdk để sử dụng AWS S3
 const path = require('path'); // Import thư viện path để xử lý đường dẫn file
-
+const Messages = require('../models/message');
 
 // Khởi tạo AWS S3
 process.env.AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE = "1";
@@ -297,4 +297,50 @@ module.exports.acceptFriendRequest = async (req, res, next) => {
         next(error);
     }
 };
-
+module.exports.acceptFriendRequestAndSendMessage = async (req, res, next) => {
+    try {
+      const { userId, friendId } = req.body;
+  
+      // Tìm người gửi (người gửi lời mời kết bạn) và người nhận (người chấp nhận lời mời kết bạn)
+      const sender = await User.findById(friendId);
+      const receiver = await User.findById(userId);
+  
+      // Kiểm tra xem người gửi và người nhận có tồn tại không
+      if (!sender || !receiver) {
+        return res.status(404).json({ error: 'Người gửi hoặc người nhận không tồn tại' });
+      }
+  
+      // Kiểm tra xem người gửi có trong danh sách lời mời kết bạn của người nhận không
+      if (!receiver.friendRequests.includes(sender._id)) {
+        return res.status(400).json({ error: 'Người này không gửi lời mời kết bạn đến bạn' });
+      }
+  
+      // Thêm người gửi vào danh sách bạn bè của người nhận
+      receiver.friends.push(sender._id);
+      // Xóa người gửi khỏi danh sách lời mời kết bạn của người nhận
+      receiver.friendRequests = receiver.friendRequests.filter(id => id.toString() !== sender._id.toString());
+  
+      // Thêm người nhận vào danh sách bạn bè của người gửi
+      sender.friends.push(receiver._id);
+      // Xóa người nhận khỏi danh sách lời mời kết bạn của người gửi
+      sender.receivedFriendRequests = sender.receivedFriendRequests.filter(id => id.toString() !== receiver._id.toString());
+  
+      // Tạo tin nhắn mặc định "Tôi đã chấp nhận lời mời của bạn"
+      const defaultMessage = "Tôi đã chấp nhận lời mời của bạn";
+      const messageData = await Messages.create({
+        message: { text: defaultMessage },
+        users: [sender._id, receiver._id],
+        sender: sender._id,
+      });
+  
+      // Lưu thông tin của cả hai người đã cập nhật vào cơ sở dữ liệu
+      await receiver.save();
+      await sender.save();
+  
+      if (messageData) return res.json({ message: 'Chấp nhận lời mời kết bạn thành công và tạo tin nhắn thành công' });
+      else return res.json({ message: 'Failed to create message' });
+    } catch (error) {
+      next(error);
+    }
+  };
+  
