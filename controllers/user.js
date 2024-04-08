@@ -245,12 +245,56 @@ module.exports.sendFriendRequest = async (req, res, next) => {
             return res.status(400).json({ error: 'Bạn đã gửi lời mời kết bạn đến người này trước đó' });
         }
 
-        // Thêm người nhận vào danh sách lời mời kết bạn của người gửi
         sender.friendRequests.push(receiver._id);
         await sender.save();
+
+        receiver.receivedFriendRequests.push(sender._id);
+        await receiver.save();
 
         return res.json({ message: 'Lời mời kết bạn đã được gửi thành công' });
     } catch (error) {
         next(error);
     }
 };
+
+module.exports.acceptFriendRequest = async (req, res, next) => {
+    try {
+        const { userId, friendId } = req.body;
+
+        // Tìm người gửi (người gửi lời mời kết bạn) và người nhận (người chấp nhận lời mời kết bạn)
+        const sender = await User.findById(friendId);
+        const receiver = await User.findById(userId);
+
+        // Kiểm tra xem người gửi có tồn tại không
+        if (!sender) {
+            return res.status(404).json({ error: 'Người gửi không tồn tại' });
+        }
+
+        // Kiểm tra xem người nhận có tồn tại không
+        if (!receiver) {
+            return res.status(404).json({ error: 'Người nhận không tồn tại' });
+        }
+
+        // Kiểm tra xem người gửi có trong danh sách lời mời kết bạn của người nhận không
+        if (!receiver.friendRequests.includes(sender._id)) {
+            return res.status(400).json({ error: 'Người này không gửi lời mời kết bạn đến bạn' });
+        }
+
+        // Thêm người gửi vào danh sách bạn bè của người nhận
+        receiver.friends.push(sender._id);
+        // Xóa người gửi khỏi danh sách lời mời kết bạn của người nhận
+        receiver.friendRequests = receiver.friendRequests.filter(id => id.toString() !== sender._id.toString());
+
+        // Thêm người nhận vào danh sách bạn bè của người gửi
+        sender.friends.push(receiver._id);
+
+        // Lưu thông tin của cả hai người đã cập nhật vào cơ sở dữ liệu
+        await receiver.save();
+        await sender.save();
+
+        return res.json({ message: 'Chấp nhận lời mời kết bạn thành công' });
+    } catch (error) {
+        next(error);
+    }
+};
+

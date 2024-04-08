@@ -22,13 +22,22 @@ const userSchema = new mongoose.Schema({
     avatar: {
         type: String 
     },
+    friends: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
     friendRequests: {
         type: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         }],
         default: []
-    }
+    },
+    receivedFriendRequests: [{ // Danh sách các lời mời kết bạn đã nhận
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }]
+    
 })
 
 module.exports = mongoose.model('user', userSchema)
