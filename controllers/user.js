@@ -1,4 +1,4 @@
-const User = require('../models/user'); // Import model User
+const User = require('../models/User'); // Import model User
 const bcrypt = require('bcrypt'); // Import thư viện bcrypt để mã hóa mật khẩu
 const multer = require('multer'); // Import thư viện multer để upload file
 const AWS = require('aws-sdk'); // Import thư viện aws-sdk để sử dụng AWS S3
@@ -224,5 +224,33 @@ exports.resetPassword = async (req, res) => {
     } catch (error) {
         console.error(error);
         return res.status(500).json({ success: false, message: 'Failed to reset password' });
+    }
+};
+
+module.exports.sendFriendRequest = async (req, res, next) => {
+    try {
+        const { senderId, receiverId } = req.body;
+
+        // Tìm người gửi và người nhận
+        const sender = await User.findById(senderId);
+        const receiver = await User.findById(receiverId);
+
+        // Kiểm tra xem người nhận có tồn tại không
+        if (!receiver) {
+            return res.status(404).json({ error: 'Người nhận không tồn tại' });
+        }
+
+        // Kiểm tra xem người nhận có trong danh sách bạn bè của người gửi không
+        if (sender.friendRequests.includes(receiver._id)) {
+            return res.status(400).json({ error: 'Bạn đã gửi lời mời kết bạn đến người này trước đó' });
+        }
+
+        // Thêm người nhận vào danh sách lời mời kết bạn của người gửi
+        sender.friendRequests.push(receiver._id);
+        await sender.save();
+
+        return res.json({ message: 'Lời mời kết bạn đã được gửi thành công' });
+    } catch (error) {
+        next(error);
     }
 };
