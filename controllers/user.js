@@ -327,5 +327,32 @@ module.exports.findUserByEmail = async (req, res, next) => {
         next(error);
     }
 };
+module.exports.getFriendRequestsSentToUser = async (req, res, next) => {
+    try {
+        const { userId } = req.params; // Lấy id của người dùng từ request params
+
+        // Tìm kiếm người dùng trong cơ sở dữ liệu bằng id
+        const user = await User.findById(userId);
+
+        // Kiểm tra xem người dùng có tồn tại không
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'Không tìm thấy người dùng'
+            });
+        }
+
+        // Lấy danh sách người gửi lời mời kết bạn tới người dùng hiện tại
+        const friendRequestsSent = await User.find({ friendRequests: { $in: [userId] } });
+
+        // Trả về danh sách người gửi lời mời kết bạn
+        return res.status(200).json({
+            success: true,
+            friendRequestsSent: friendRequestsSent
+        });
+    } catch (error) {
+        next(error);
+    }
+};
 
   
