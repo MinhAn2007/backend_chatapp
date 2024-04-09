@@ -76,7 +76,7 @@ module.exports.deleteMessage = async (req, res, next) => {
     }
 
     // Xóa tin nhắn
-    await Messages.findByIdAndDelete(messageId);
+    await Messages.findByIdAndUpdate(messageId, { "message.text": "đã thu hồi 1 tin nhắn" });
 
     return res.json({ message: "Message deleted successfully" });
   } catch (ex) {
