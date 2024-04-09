@@ -15,6 +15,8 @@ module.exports.getMessages = async (req, res, next) => {
         id: msg._id, // Include the ID of the message
         fromSelf: msg.sender.toString() === from,
         message: msg.message.text,
+        createdAt: msg.createdAt,
+        isHidden: msg.isHidden,
       };
     });
     res.json(projectedMessages);
@@ -42,25 +44,26 @@ module.exports.addMessage = async (req, res, next) => {
 module.exports.retrieveMessage = async (req, res, next) => {
   try {
     const { messageId, senderId } = req.params;
-
-    // Kiểm tra xem người gửi có phải là người gửi của tin nhắn hay không
-    const message = await Messages.findOne({
-      _id: messageId,
-      sender: senderId,
-    });
-
+    console.log(messageId, senderId);
+    const message = await Messages.findOneAndUpdate(
+      { _id: messageId, sender: senderId },
+      { $set: { isHidden: true } },
+      { new: true }
+    );
+    console.log(message);
+    // Nếu không tìm thấy tin nhắn, trả về lỗi
     if (!message) {
       return res.status(404).json({ error: "Message not found or not sent by the sender" });
     }
 
-    // Xóa tin nhắn nếu người gửi là người thu hồi
-    await Messages.findByIdAndDelete(messageId);
-
-    return res.json({ message: "Message retrieved successfully" });
+    // Trả về tin nhắn đã được cập nhật
+    return res.json({ message: "Message retrieved successfully", updatedMessage: message });
   } catch (ex) {
     next(ex);
   }
 };
+
+
 module.exports.deleteMessage = async (req, res, next) => {
   try {
     const { messageId } = req.params;

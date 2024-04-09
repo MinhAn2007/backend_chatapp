@@ -27,7 +27,7 @@ app.post("/getmsg/", getMessages); // Định tuyến cho endpoint lấy tất c
 
 app.delete("/deletemsg/:messageId/", deleteMessage); // Định tuyến cho endpoint xóa tin nhắn
 
-app.get("/retrievemsg/:messageId/:senderId", retrieveMessage); // Định tuyến cho endpoint thu hồi tin nhắn
+app.put("/retrievemsg/:messageId/:senderId", retrieveMessage); // Định tuyến cho endpoint thu hồi tin nhắn
 
 console.log(expressListEndpoints(app)); // In ra danh sách các endpoint mà server đang lắng nghe
 

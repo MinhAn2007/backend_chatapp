@@ -11,6 +11,7 @@ const MessageSchema = mongoose.Schema(
       ref: "User",
       required: true,
     },
+    isHidden: { type: Boolean, default: false }, 
   },
   {
     timestamps: true,
