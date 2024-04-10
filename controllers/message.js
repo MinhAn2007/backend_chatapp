@@ -24,6 +24,40 @@ module.exports.getMessages = async (req, res, next) => {
     next(ex);
   }
 };
+module.exports.forwardMessage = async (req, res, next) => {
+  try {
+    const { from, to, message } = req.body;
+    
+    // Xác định số lượng người nhận tin nhắn
+    const recipients = Array.isArray(to) ? to : [to];
+    
+    // Hàm gửi tin nhắn cho từng người dùng một cách tuần tự
+    async function sendMessageToRecipients(recipients) {
+      for (let i = 0; i < recipients.length; i++) {
+        const recipient = recipients[i];
+        
+        // Tạo tin nhắn
+        const data = await Messages.create({
+          message: { text: message },
+          users: [from, recipient],
+          sender: from,
+        });
+        
+        // Kiểm tra kết quả và gửi phản hồi
+        if (!data) {
+          return res.status(500).json({ msg: "Failed to add message to the database" });
+        }
+      }
+      return res.json({ msg: "Messages added successfully." });
+    }
+    
+    // Gửi tin nhắn cho từng người dùng một cách tuần tự
+    await sendMessageToRecipients(recipients);
+    
+  } catch (ex) {
+    next(ex);
+  }
+};
 
 
 module.exports.addMessage = async (req, res, next) => {
