@@ -1,8 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const expressListEndpoints = require('express-list-endpoints');
-const { addMessage, getMessages,deleteMessage,retrieveMessage } = require("././controllers/message");
-const socket = require("socket.io"); // Import thư viện socket.io
+const { addMessage, getMessages,deleteMessage,retrieveMessage, forwardMessage } = require("././controllers/message");
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -28,6 +27,8 @@ app.post("/getmsg/", getMessages); // Định tuyến cho endpoint lấy tất c
 app.delete("/deletemsg/:messageId/", deleteMessage); // Định tuyến cho endpoint xóa tin nhắn
 
 app.put("/retrievemsg/:messageId/:senderId", retrieveMessage); // Định tuyến cho endpoint thu hồi tin nhắn
+
+app.post("/forwardMessage", forwardMessage); // Định tuyến cho endpoint chuyển tiếp tin nhắn
 
 console.log(expressListEndpoints(app)); // In ra danh sách các endpoint mà server đang lắng nghe
 
