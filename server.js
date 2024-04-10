@@ -35,31 +35,24 @@ const server = app.listen(PORT, () => { // Khởi tạo server và lắng nghe t
     console.log("Server Started in", PORT);
 });
 
-// Khởi tạo Socket.IO
-const io = socket(server, {
+const socketIo = require("socket.io")(server, {
     cors: {
-        origin: ["http://localhost:3000", "http://localhost:3001"],
-        credentials: true,
-    },
-});
+        origin: "*",
+    }
+  });
 
-global.onlineUsers = new Map(); // Biến toàn cục để lưu trữ thông tin của người dùng đang trực tuyến
 
-// Xử lý các sự kiện của Socket.IO
-io.on("connection", (socket) => {
-    socket.on("add-user", (userId) => {
-        onlineUsers.set(userId, socket.id);
-    });
+socketIo.on("connection", (socket) => {
+  console.log("New client connected" + socket.id);
 
-    socket.on("send-msg", (data) => {
-        console.log(`Received a message from user ${data.from}: ${data.msg}`);
-        
-        const sendUserSocket = onlineUsers.get(data.to);
-        if (sendUserSocket) {
-            socket.to(sendUserSocket).emit("msg-recieve", data.msg);
-            console.log(`Sent message to user ${data.to}`);
-        } else {
-            console.log(`User ${data.to} is not online`);
-        }
-    });
+  socket.emit("getId", socket.id);
+
+  socket.on("sendDataClient", function(data) {
+    console.log(data)
+    socketIo.emit("sendDataServer", { data });
+  })
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+  });
 });
