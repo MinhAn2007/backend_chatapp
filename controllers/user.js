@@ -27,14 +27,14 @@ const storage = multer.memoryStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 2000000 },
+  limits: { fileSize: 300000000 },
   fileFilter(req, file, cb) {
     checkFileType(file, cb);
   },
 }).single("avatar");
 
 function checkFileType(file, cb) {
-  const fileTypes = /jpeg|jpg|png|gif|doc|docx|xls|xlsx|pdf|csv|json/; // Thêm các loại file mới vào regex
+  const fileTypes = /jpeg|jpg|png|gif|doc|docx|xls|xlsx|pdf|csv|json|mp4|mp3/; // Thêm các loại file mới vào regex
   const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
   const mimetype = fileTypes.test(file.mimetype);
   if (extname && mimetype) {
