@@ -4,7 +4,7 @@ const router = express.Router()
 //Handlers from controllers
 const { login, signup, sendotp } = require("../controllers/auth")
 const { updateUser, updatePassword, uploadAvatarS3, resetPassword ,findUserByEmail,
-    sendFriendRequest,acceptFriendRequestAndSendMessage,
+    sendFriendRequest,acceptFriendRequestAndSendMessage,rejectFriendRequest,
     getFriendRequestsSentToUser,getFriendList} = require('../controllers/user')
 
 
@@ -20,5 +20,5 @@ router.get('/getFriendRequestsSentToUser/:userId',getFriendRequestsSentToUser)
 router.get('/getFriendList/:userId',getFriendList);
 router.post("/sendFriendRequest/", sendFriendRequest);
 router.post("/acceptFriendRequestAndSendMessage/", acceptFriendRequestAndSendMessage);
-
+router.post("/rejectFriendRequest/", rejectFriendRequest);
 module.exports = router

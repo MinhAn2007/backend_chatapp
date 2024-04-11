@@ -402,3 +402,42 @@ exports.getFriendList = async (req, res, next) => {
     next(error);
   }
 };
+module.exports.rejectFriendRequest = async (req, res, next) => {
+  try {
+    const { userId, friendId } = req.body;
+
+    // Tìm người gửi (người gửi lời mời kết bạn) và người nhận (người nhận lời mời kết bạn)
+    const sender = await User.findById(friendId);
+    const receiver = await User.findById(userId);
+
+    // Kiểm tra xem người gửi và người nhận có tồn tại không
+    if (!sender || !receiver) {
+      return res.status(404).json({ error: "Người gửi hoặc người nhận không tồn tại" });
+    }
+
+    // Kiểm tra xem người gửi có trong danh sách lời mời kết bạn của người nhận không
+    if (!receiver.receivedFriendRequests.includes(sender._id)) {
+      return res.status(400).json({ error: "Người này không gửi lời mời kết bạn đến bạn" });
+    }
+
+    // Xóa người gửi khỏi danh sách lời mời kết bạn của người nhận
+    receiver.receivedFriendRequests = receiver.receivedFriendRequests.filter(
+      (id) => id.toString() !== sender._id.toString()
+    );
+
+    // Kiểm tra xem người nhận có trong danh sách lời mời kết bạn của người gửi không
+    if (sender.friendRequests.includes(receiver._id)) {
+      // Xóa người nhận khỏi danh sách lời mời kết bạn của người gửi
+      sender.friendRequests = sender.friendRequests.filter(
+        (id) => id.toString() !== receiver._id.toString()
+      );
+    }
+
+    // Lưu thông tin cập nhật vào cơ sở dữ liệu
+    await Promise.all([receiver.save(), sender.save()]);
+
+    return res.json({ message: "Từ chối lời mời kết bạn thành công" });
+  } catch (error) {
+    next(error);
+  }
+};
