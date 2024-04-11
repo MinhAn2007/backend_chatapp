@@ -300,18 +300,15 @@ module.exports.acceptFriendRequestAndSendMessage = async (req, res, next) => {
     sender.receivedFriendRequests = sender.receivedFriendRequests.filter(
       (id) => id.toString() !== receiver._id.toString()
     );
+    await sender.save();
+    await receiver.save();
 
-    // Tạo tin nhắn mặc định "Tôi đã chấp nhận lời mời của bạn"
     const defaultMessage = "Tôi đã chấp nhận lời mời của bạn";
     const messageData = await Messages.create({
       message: { text: defaultMessage },
-      users: [sender._id, receiver._id],
+      users: [sender._id.toString(), receiver._id.toString()],
       sender: sender._id,
     });
-
-    // Lưu thông tin của cả hai người đã cập nhật vào cơ sở dữ liệu
-    await receiver.save();
-    await sender.save();
 
     if (messageData)
       return res.json({
