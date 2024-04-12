@@ -82,6 +82,7 @@ exports.login = async (req, res) => {
 
         // Tìm kiếm người dùng trong cơ sở dữ liệu
         let foundUser = await User.findOne({ email });
+        console.log(foundUser);
         if (!foundUser) {
             return res.status(401).json({
                 success: false,

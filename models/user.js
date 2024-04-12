@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const group = require('./group')
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -36,6 +37,10 @@ const userSchema = new mongoose.Schema({
     receivedFriendRequests: [{ // Danh sách các lời mời kết bạn đã nhận
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
+    }],
+    group: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Group'
     }]
     
 })
