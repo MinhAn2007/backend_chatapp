@@ -18,6 +18,8 @@ require('./config/database').connect(); // Kết nối với cơ sở dữ liệ
 const user = require('./routes/user'); // Import các routes cho user từ thư mục routes/user
 app.use('/user', user); // Sử dụng routes cho user
 
+const group = require('./routes/group'); // Import các routes cho group từ thư mục routes/group
+app.use('/group', group); // Sử dụng routes cho group
 // Endpoint để thêm tin nhắn mới
 app.post("/addmsg/", addMessage); // Định tuyến cho endpoint thêm tin nhắn mới
 
