@@ -52,6 +52,10 @@ socketIo.on("connection", (socket) => {
     console.log(data)
     socketIo.emit("sendDataServer", { data });
   })
+  socket.on("message_deletedClient", function(data) {
+    console.log(data)
+    socketIo.emit("message_deleted", { data });
+  })
 
   socket.on("disconnect", () => {
     console.log("Client disconnected");
