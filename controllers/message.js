@@ -1,4 +1,5 @@
 const Messages = require("../models/message");
+const User = require("../models/User.js");
 
 module.exports.getMessages = async (req, res, next) => {
   try {
@@ -17,6 +18,7 @@ module.exports.getMessages = async (req, res, next) => {
         message: msg.message.text,
         createdAt: msg.createdAt,
         isHidden: msg.isHidden,
+        avatar: msg.avatar,
       };
     });
     res.json(projectedMessages);
@@ -62,11 +64,13 @@ module.exports.forwardMessage = async (req, res, next) => {
 
 module.exports.addMessage = async (req, res, next) => {
   try {
-    const { from, to, message } = req.body;
+    const { from, to, message ,avatar} = req.body;
     const data = await Messages.create({
       message: { text: message },
       users: [from, to],
       sender: from,
+      avatar: avatar,
+
     });
 
     if (data) return res.json({ msg: "Message added successfully." ,data: data });
@@ -113,6 +117,56 @@ module.exports.deleteMessage = async (req, res, next) => {
     await Messages.findByIdAndUpdate(messageId, { "message.text": "đã thu hồi 1 tin nhắn" });
 
     return res.json({ message: "Message deleted successfully" });
+  } catch (ex) {
+    next(ex);
+  }
+};
+module.exports.getGroupMessages = async (req, res, next) => {
+  try {
+    const { groupId,from } = req.body; // Lấy ID của nhóm từ yêu cầu
+
+    const messages = await Messages.find({
+      group: groupId, // Tìm kiếm tin nhắn của nhóm cụ thể
+    }).sort({ updatedAt: 1 });
+    const projectedMessages = await Promise.all(messages.map(async (msg) => {
+      const sender = await User.findById(msg.sender).select('name');
+      console.log('Sender name:', sender.name); // Chỉnh lại thành sender.name
+      return {
+          id: msg._id,
+          fromSelf: msg.sender.toString() === from,
+          message: msg.message.text,
+          createdAt: msg.createdAt,
+          isHidden: msg.isHidden,
+          group: msg.group,
+          avatar: msg.avatar,
+          name: sender.name, // Thay vì senderName
+      };
+  }));
+  
+
+    res.json(projectedMessages); // Trả về tin nhắn của nhóm
+  } catch (ex) {
+    next(ex); // Xử lý lỗi nếu có
+  }
+};
+
+module.exports.sendMessageToGroup = async (req, res, next) => {
+  try {
+    const { to, from, message,avatar } = req.body; // Lấy thông tin từ yêu cầu
+
+    const newMessage = await Messages.create({
+      message: { text: message }, // Nội dung tin nhắn
+      users: [from, to],
+      group: to, // ID của nhóm
+      sender: from, // Người gửi
+      avatar: avatar,
+    });
+
+    if (newMessage) {
+      return res.json({ message: "Message sent to group successfully", data: newMessage });
+    } else {
+      return res.status(500).json({ error: "Failed to send message to group" });
+    }
   } catch (ex) {
     next(ex);
   }
