@@ -111,9 +111,6 @@ exports.deleteGroup = async (req, res, next) => {
       });
     }
 
-    // Lấy danh sách các thành viên của nhóm
-    const members = deletedGroup.members;
-
     // Cập nhật thông tin người dùng
     await User.updateMany(
       // Lọc người dùng có groupId bằng groupId của nhóm cần xóa
@@ -131,3 +128,42 @@ exports.deleteGroup = async (req, res, next) => {
     next(error);
   }
 };
+exports.addMemberToGroup = async (req, res, next) => {
+    try {
+        const { groupId } = req.params; // Lấy id của nhóm từ request params
+        const { memberId } = req.body; // Lấy mảng các thành viên từ body của request
+
+        // Kiểm tra xem nhóm có tồn tại không
+        const group = await Group.findById(groupId);
+        if (!group) {
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy nhóm",
+            });
+        }
+
+        // Lặp qua mỗi memberId trong mảng
+        for (const member of memberId) {
+            // Kiểm tra xem thành viên đã tồn tại trong nhóm chưa
+            if (!group.members.includes(member)) {
+                // Thêm memberId vào danh sách thành viên của nhóm
+                group.members.push(member);
+
+                // Cập nhật thông tin người dùng
+                await updateUser(member, groupId);
+            }
+        }
+
+        // Lưu thông tin nhóm đã được cập nhật
+        await group.save();
+
+        // Trả về phản hồi thành công
+        return res.status(200).json({
+            success: true,
+            message: "Thêm thành viên vào nhóm thành công",
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+  

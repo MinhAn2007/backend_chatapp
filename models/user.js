@@ -1,5 +1,4 @@
 const mongoose = require('mongoose')
-const group = require('./group')
 
 const userSchema = new mongoose.Schema({
     name: {
