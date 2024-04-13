@@ -128,45 +128,44 @@ exports.deleteGroup = async (req, res, next) => {
     next(error);
   }
 };
-exports.addMemberToGroup = async (req, res, next) => {
+exports.addMembersToGroup = async (req, res, next) => {
     try {
-        const { groupId } = req.params; // Lấy id của nhóm từ request params
-        const { memberId } = req.body; // Lấy mảng các thành viên từ body của request
+        const { groupId } = req.params; // Get group ID from request params
+        const { memberIds } = req.body; // Get an array of member IDs from request body
 
-        // Kiểm tra xem nhóm có tồn tại không
+        // Check if the group exists
         const group = await Group.findById(groupId);
         if (!group) {
             return res.status(404).json({
                 success: false,
-                message: "Không tìm thấy nhóm",
+                message: "Group not found",
             });
         }
 
-        // Lặp qua mỗi memberId trong mảng
-        for (const member of memberId) {
-            // Kiểm tra xem thành viên đã tồn tại trong nhóm chưa
-            if (!group.members.includes(member)) {
-                // Thêm memberId vào danh sách thành viên của nhóm
-                group.members.push(member);
+        // Loop through each member ID and add them to the group if they are not already a member
+        for (const memberId of memberIds) {
+            // Check if the member already exists in the group
+            if (!group.members.includes(memberId)) {
+                // Add the member to the group
+                group.members.push(memberId);
 
-                // Cập nhật thông tin người dùng
-                await updateUser(member, groupId);
+                // Update the user's group information
+                await updateUser(memberId, groupId);
             }
         }
 
-        // Lưu thông tin nhóm đã được cập nhật
+        // Save the updated group information
         await group.save();
 
-        // Trả về phản hồi thành công
+        // Return success response
         return res.status(200).json({
             success: true,
-            message: "Thêm thành viên vào nhóm thành công",
+            message: "Members added to the group successfully",
         });
     } catch (error) {
         next(error);
     }
 };
-  
 
 exports.getNonGroupFriends = async (req, res, next) => {
   try {
@@ -249,3 +248,46 @@ exports.getGroupMembers = async (req, res, next) => {
       next(error);
     }
   };
+
+ module.exports.removeMembersFromGroup = async (req, res, next) => {
+    try {
+      const { groupId } = req.params; // Get group ID from request params
+      const { memberIds } = req.body; // Get an array of member IDs from request body
+  
+      // Find the group in the database by ID
+      const group = await Group.findById(groupId);
+  
+      // Check if the group exists
+      if (!group) {
+        return res.status(404).json({
+          success: false,
+          message: "Group not found",
+        });
+      }
+  
+      // Loop through each member ID and remove them from the group
+      memberIds.forEach(async (memberId) => {
+        // Check if the member exists in the group
+        const index = group.members.indexOf(memberId);
+        if (index !== -1) {
+          // Remove the member from the group
+          group.members.splice(index, 1);
+  
+          // Update the user's group information
+          await User.findByIdAndUpdate(memberId, { $pull: { groups: groupId } });
+        }
+      });
+  
+      // Save the updated group information
+      await group.save();
+  
+      // Return success response
+      return res.status(200).json({
+        success: true,
+        message: "Members removed from the group successfully",
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+  
