@@ -369,6 +369,54 @@ module.exports.setCoLeader = async (req, res, next) => {
         next(error);
     }
 };
+exports.transferOwnership = async (req, res, next) => {
+    try {
+        const { groupId, newOwnerId } = req.params; // Lấy ID của nhóm và ID của người dùng mới từ request params
+
+        // Tìm nhóm trong cơ sở dữ liệu
+        const group = await Group.findById(groupId);
+
+        // Kiểm tra xem nhóm có tồn tại không
+        if (!group) {
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy nhóm",
+            });
+        }
+
+        // Kiểm tra xem người dùng mới có tồn tại không
+        const newOwner = await User.findById(newOwnerId);
+        if (!newOwner) {
+            return res.status(404).json({
+                success: false,
+                message: "Người dùng mới không tồn tại",
+            });
+        }
+
+        // Kiểm tra xem người gửi yêu cầu có phải là chủ nhóm hay không
+        if (req.user._id.toString() !== group.owner.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: "Bạn không có quyền thực hiện thao tác này",
+            });
+        }
+
+        // Cập nhật thông tin nhóm trưởng
+        group.leader = newOwnerId;
+        group.owner = newOwnerId;
+
+        // Lưu thông tin nhóm đã được cập nhật
+        await group.save();
+
+        // Trả về phản hồi thành công
+        return res.status(200).json({
+            success: true,
+            message: "Nhượng quyền nhóm trưởng thành công",
+        });
+    } catch (error) {
+        next(error);
+    }
+};
 
 
 
