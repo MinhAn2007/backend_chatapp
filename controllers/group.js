@@ -249,45 +249,67 @@ exports.getGroupMembers = async (req, res, next) => {
     }
   };
 
- module.exports.removeMembersFromGroup = async (req, res, next) => {
+  module.exports.removeMembersFromGroup = async (req, res, next) => {
     try {
-      const { groupId } = req.params; // Get group ID from request params
-      const { memberIds } = req.body; // Get an array of member IDs from request body
-  
-      // Find the group in the database by ID
-      const group = await Group.findById(groupId);
-  
-      // Check if the group exists
-      if (!group) {
-        return res.status(404).json({
-          success: false,
-          message: "Group not found",
-        });
-      }
-  
-      // Loop through each member ID and remove them from the group
-      memberIds.forEach(async (memberId) => {
-        // Check if the member exists in the group
-        const index = group.members.indexOf(memberId);
-        if (index !== -1) {
-          // Remove the member from the group
-          group.members.splice(index, 1);
-  
-          // Update the user's group information
-          await User.findByIdAndUpdate(memberId, { $pull: { groups: groupId } });
+        const { groupId } = req.params; // Get group ID from request params
+        const { memberIds } = req.body; // Get an array of member IDs from request body
+
+        // Check if memberIds is an array
+        if (!Array.isArray(memberIds)) {
+            return res.status(400).json({
+                success: false,
+                message: "memberIds must be an array",
+            });
         }
-      });
-  
-      // Save the updated group information
-      await group.save();
-  
-      // Return success response
-      return res.status(200).json({
-        success: true,
-        message: "Members removed from the group successfully",
-      });
+
+        // Find the group in the database by ID
+        const group = await Group.findById(groupId);
+
+        // Check if the group exists
+        if (!group) {
+            return res.status(404).json({
+                success: false,
+                message: "Group not found",
+            });
+        }
+
+        // Calculate the number of members after removal
+        const remainingMembersCount = group.members.length - memberIds.length;
+
+        // Check if the remaining number of members would be less than 3
+        if (remainingMembersCount < 3) {
+            return res.status(400).json({
+                success: false,
+                message: "Nhóm phải có ít nhất 3 thành viên",
+            });
+        }
+
+        // Loop through each member ID and remove them from the group
+        for (const memberId of memberIds) {
+            // Check if the member exists in the group
+            const index = group.members.indexOf(memberId);
+            if (index !== -1) {
+                // Remove the member from the group
+                group.members.splice(index, 1);
+
+                // Update the user's group information
+                await User.findByIdAndUpdate(memberId, { $pull: { groups: groupId } });
+            }
+        }
+
+        // Save the updated group information
+        await group.save();
+
+        // Return success response
+        return res.status(200).json({
+            success: true,
+            message: "Members removed from the group successfully",
+        });
     } catch (error) {
-      next(error);
+        next(error);
     }
-  };
+};
+
+
+
   

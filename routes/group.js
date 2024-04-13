@@ -9,5 +9,5 @@ router.delete('/deleteGroup/:groupId', deleteGroup)
 router.put('/addMemberToGroup/:groupId', addMembersToGroup)
 router.get('/getNonGroupFriends/:userId/:groupId', getNonGroupFriends)
 router.get('/getGroupMembers/:groupId', getGroupMembers)
-router.put('/removeMemberFromGroup/:groupId', removeMembersFromGroup)
+router.put('/removeMembersFromGroup/:groupId', removeMembersFromGroup)
 module.exports = router
