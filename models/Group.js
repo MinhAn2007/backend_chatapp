@@ -14,10 +14,10 @@ const groupSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User' // Tham chiếu tới user trong collection 'User'
     },
-    coLeader: {  // Nhóm phó
+    coLeader: [{  // Nhóm phó
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User' // Tham chiếu tới user trong collection 'User'
-    },
+    }],
     members: [{  // Các thành viên
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User' // Tham chiếu tới user trong collection 'User'

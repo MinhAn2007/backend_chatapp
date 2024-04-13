@@ -309,6 +309,64 @@ exports.getGroupMembers = async (req, res, next) => {
         next(error);
     }
 };
+module.exports.setCoLeader = async (req, res, next) => {
+    try {
+        const { groupId, userId } = req.params; // Lấy ID của nhóm và ID của người dùng từ request params
+
+        // Tìm nhóm trong cơ sở dữ liệu
+        const group = await Group.findById(groupId);
+        console.log(group);
+        // Kiểm tra xem nhóm có tồn tại không
+        if (!group) {
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy nhóm",
+            });
+        }
+
+        // Kiểm tra xem người dùng có tồn tại không
+        const user = await User.findById(userId);
+        console
+        console.log(user);
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "Không tìm thấy người dùng",
+            });
+        }
+
+        // Kiểm tra xem nhóm đã có đủ 2 nhóm phó chưa
+        if (group.coLeader.length >= 2) {
+            return res.status(400).json({
+                success: false,
+                message: "Nhóm đã có đủ 2 nhóm phó",
+            });
+        }
+
+        // Kiểm tra xem người dùng đã là nhóm phó chưa
+        if (group.coLeader.includes(userId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Người dùng đã là nhóm phó của nhóm này",
+            });
+        }
+
+        // Phân quyền người dùng thành nhóm phó
+        group.coLeader.push(userId);
+
+        // Lưu thông tin nhóm đã được cập nhật
+        await group.save();
+
+        // Trả về phản hồi thành công
+        return res.status(200).json({
+            success: true,
+            message: "Người dùng đã được phân quyền thành nhóm phó",
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 
 
 
