@@ -198,3 +198,54 @@ exports.getNonGroupFriends = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getGroupMembers = async (req, res, next) => {
+    try {
+      const { groupId } = req.params; // Lấy ID của nhóm từ request params
+  
+      // Tìm kiếm nhóm trong cơ sở dữ liệu bằng ID
+      const group = await Group.findById(groupId);
+  
+      // Kiểm tra xem nhóm có tồn tại không
+      if (!group) {
+        return res.status(404).json({
+          success: false,
+          message: "Không tìm thấy nhóm",
+        });
+      }
+  
+      // Lấy danh sách thành viên trong nhóm cùng với vai trò của họ
+      const membersWithRoles = await Promise.all(
+        group.members.map(async (memberId) => {
+          const user = await User.findById(memberId); // Tìm kiếm thông tin người dùng bằng ID
+          if (!user) {
+            return null; // Trả về null nếu không tìm thấy người dùng
+          }
+          let role = "member"; // Giả sử mặc định là vai trò "member"
+          console.log(group.leader.toString());
+            console.log(memberId);
+          if (group.leader.toString() === memberId.toString()) {
+            role = "leader"; // Nếu là người tạo nhóm, vai trò là "leader"
+          } else if (group.coLeader && group.coLeader.toString() === memberId) {
+            role = "coLeader"; // Nếu là co-leader, vai trò là "coLeader"
+          }
+          return {
+            _id: user._id,
+            name: user.name,
+            role: role,
+          };
+        })
+      );
+  
+      // Lọc bỏ những thành viên không tồn tại trong nhóm
+      const validMembersWithRoles = membersWithRoles.filter((member) => member !== null);
+  
+      // Trả về danh sách thành viên trong nhóm cùng với vai trò của họ
+      return res.status(200).json({
+        success: true,
+        groupMembers: validMembersWithRoles,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
