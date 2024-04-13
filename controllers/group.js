@@ -223,11 +223,14 @@ exports.getGroupMembers = async (req, res, next) => {
           let role = "member"; // Giả sử mặc định là vai trò "member"
           console.log(group.leader.toString());
             console.log(memberId);
-          if (group.leader.toString() === memberId.toString()) {
-            role = "leader"; // Nếu là người tạo nhóm, vai trò là "leader"
-          } else if (group.coLeader && group.coLeader.toString() === memberId) {
-            role = "coLeader"; // Nếu là co-leader, vai trò là "coLeader"
-          }
+            if (group.leader.toString() === memberId.toString()) {
+                role = "leader"; // Nếu là người tạo nhóm, vai trò là "leader"
+            } else {
+                // Nếu không phải là người tạo nhóm, kiểm tra xem memberId có là co-leader không
+                if (Array.isArray(group.coLeader) && group.coLeader.includes(memberId.toString())) {
+                    role = "coLeader"; // Nếu là co-leader, vai trò là "coLeader"
+                }
+            }
           return {
             _id: user._id,
             name: user.name,
