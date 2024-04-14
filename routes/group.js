@@ -11,5 +11,5 @@ router.get('/getNonGroupFriends/:userId/:groupId', getNonGroupFriends)
 router.get('/getGroupMembers/:groupId', getGroupMembers)
 router.put('/removeMembersFromGroup/:groupId', removeMembersFromGroup)
 router.put('/setCoLeader/:groupId/:userId', setCoLeader)
-router.put('/transferOwnership/:groupId/:userId', transferOwnership)
+router.put('/transferOwnership/:groupId/:newOwnerId', transferOwnership)
 module.exports = router
