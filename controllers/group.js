@@ -408,6 +408,57 @@ exports.transferOwnership = async (req, res, next) => {
     }
 };
 
+exports.leaveGroup = async (req, res, next) => {
+  try {
+      const { groupId, userId } = req.params; // Lấy ID của nhóm và ID của người dùng từ request params
+
+      // Tìm nhóm trong cơ sở dữ liệu
+      const group = await Group.findById(groupId);
+
+      // Kiểm tra xem nhóm có tồn tại không
+      if (!group) {
+          return res.status(404).json({
+              success: false,
+              message: "Không tìm thấy nhóm",
+          });
+      }
+
+      // Kiểm tra xem người dùng có tồn tại trong nhóm không
+      const index = group.members.indexOf(userId);
+      if (index === -1) {
+          return res.status(404).json({
+              success: false,
+              message: "Người dùng không tồn tại trong nhóm",
+          });
+      }
+
+      // Kiểm tra xem người dùng có phải là nhóm trưởng không
+      if (group.leader.toString() === userId.toString()) {
+          return res.status(403).json({
+              success: false,
+              message: "Không thể rời nhóm vì bạn là nhóm trưởng. Xin hãy chuyển quyền trước.",
+          });
+      }
+
+      // Xóa người dùng khỏi nhóm
+      group.members.splice(index, 1);
+
+      // Cập nhật thông tin nhóm đã được cập nhật
+      await group.save();
+
+      // Xóa ID nhóm khỏi danh sách nhóm của người dùng
+      await User.findByIdAndUpdate(userId, { $pull: { groups: groupId } });
+
+      // Trả về phản hồi thành công
+      return res.status(200).json({
+          success: true,
+          message: "Rời nhóm thành công",
+      });
+  } catch (error) {
+      next(error);
+  }
+};
+
 
 
 
