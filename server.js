@@ -65,6 +65,9 @@ socketIo.on("connection", (socket) => {
   socket.on("transferLeader", function(data) {
     socketIo.emit("transferLeader", { data });
   })  
+  socket.on("deleteGroupWhenMem", function(data) {
+    socketIo.emit("deleteGroupWhenMem", { data });
+  })  
   socket.on("message_deletedClient", function(data) {
     console.log(data)
     socketIo.emit("message_deleted", { data });

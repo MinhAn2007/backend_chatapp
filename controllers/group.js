@@ -299,7 +299,12 @@ exports.getGroupMembers = async (req, res, next) => {
                 await User.findByIdAndUpdate(memberId, { $pull: { groups: groupId } });
             }
         }
-
+        for (const memberId of memberIds) {
+        const coLeaderIndex = group.coLeader.indexOf(memberId);
+        if (coLeaderIndex !== -1) {
+          // Nếu người dùng là nhóm phó, loại bỏ người dùng khỏi mảng coLeader
+          group.coLeader.splice(coLeaderIndex, 1);
+        }}
         // Save the updated group information
         await group.save();
 
@@ -439,11 +444,27 @@ exports.leaveGroup = async (req, res, next) => {
               message: "Không thể rời nhóm vì bạn là nhóm trưởng. Xin hãy chuyển quyền trước.",
           });
       }
+      console.log(group.members.length);
+      // Kiểm tra xem nhóm có ít hơn 3 thành viên không
+      if (group.members.length < 4) {
+          // Giải tán nhóm nếu ít hơn 3 thành viên
+          await Group.findByIdAndDelete(groupId);
+          console.log("trest");
+          // Cập nhật thông tin của các người dùng trong nhóm
+          await User.updateMany({ _id: { $in: group.members } }, { $pull: { groups: groupId } });
+
+          return res.status(200).json({
+              success: true,
+              message: "Nhóm đã được giải tán vì ít hơn 3 thành viên",
+          });
+      }
+
+      // Nếu người dùng là nhóm phó, loại bỏ người dùng khỏi mảng coLeader
       const coLeaderIndex = group.coLeader.indexOf(userId);
       if (coLeaderIndex !== -1) {
-        // Nếu người dùng là nhóm phó, loại bỏ người dùng khỏi mảng coLeader
-        group.coLeader.splice(coLeaderIndex, 1);
+          group.coLeader.splice(coLeaderIndex, 1);
       }
+
       // Xóa người dùng khỏi nhóm
       group.members.splice(index, 1);
 
@@ -462,7 +483,6 @@ exports.leaveGroup = async (req, res, next) => {
       next(error);
   }
 };
-
 
 
 
