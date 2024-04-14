@@ -439,7 +439,11 @@ exports.leaveGroup = async (req, res, next) => {
               message: "Không thể rời nhóm vì bạn là nhóm trưởng. Xin hãy chuyển quyền trước.",
           });
       }
-
+      const coLeaderIndex = group.coLeader.indexOf(userId);
+      if (coLeaderIndex !== -1) {
+        // Nếu người dùng là nhóm phó, loại bỏ người dùng khỏi mảng coLeader
+        group.coLeader.splice(coLeaderIndex, 1);
+      }
       // Xóa người dùng khỏi nhóm
       group.members.splice(index, 1);
 
