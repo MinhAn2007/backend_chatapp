@@ -441,3 +441,28 @@ module.exports.rejectFriendRequest = async (req, res, next) => {
     next(error);
   }
 };
+exports.unfriendUser = async (req, res, next) => {
+  try {
+    const { userId, friendId } = req.body;
+
+    // Tìm người dùng và bạn bè trong cơ sở dữ liệu
+    const user = await User.findById(userId);
+    const friend = await User.findById(friendId);
+
+    // Kiểm tra xem người dùng và bạn bè có tồn tại không
+    if (!user || !friend) {
+      return res.status(404).json({ error: "Người dùng hoặc bạn bè không tồn tại" });
+    }
+
+    // Xóa bạn bè khỏi danh sách bạn bè của người dùng và ngược lại
+    user.friends = user.friends.filter(f => f.toString() !== friendId);
+    friend.friends = friend.friends.filter(u => u.toString() !== userId);
+
+    // Lưu thông tin cập nhật vào cơ sở dữ liệu
+    await Promise.all([user.save(), friend.save()]);
+
+    return res.json({ message: "Hủy kết bạn thành công" });
+  } catch (error) {
+    next(error);
+  }
+};
