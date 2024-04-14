@@ -55,9 +55,16 @@ socketIo.on("connection", (socket) => {
   socket.emit("getId", socket.id);
 
   socket.on("sendDataClient", function(data) {
-    console.log(data)
+    console.log("gr",data)
     socketIo.emit("sendDataServer", { data });
   })
+  socket.on("addGroup", function(data) {
+    socketIo.emit("addGroup", { data });
+    console.log("send addGroup",data)
+  })
+  socket.on("transferLeader", function(data) {
+    socketIo.emit("transferLeader", { data });
+  })  
   socket.on("message_deletedClient", function(data) {
     console.log(data)
     socketIo.emit("message_deleted", { data });
