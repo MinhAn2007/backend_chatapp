@@ -1,6 +1,6 @@
 const Group = require("../models/group");
 const User = require("../models/User.js");
-
+const Messages = require("../models/message.js");
 module.exports.newGroups = async (req, res) => {
   const { name, creatorId, avatar, members } = req.body;
 
@@ -449,7 +449,6 @@ exports.leaveGroup = async (req, res, next) => {
       if (group.members.length < 4) {
           // Giải tán nhóm nếu ít hơn 3 thành viên
           await Group.findByIdAndDelete(groupId);
-          console.log("trest");
           // Cập nhật thông tin của các người dùng trong nhóm
           await User.updateMany({ _id: { $in: group.members } }, { $pull: { groups: groupId } });
 
@@ -464,7 +463,15 @@ exports.leaveGroup = async (req, res, next) => {
       if (coLeaderIndex !== -1) {
           group.coLeader.splice(coLeaderIndex, 1);
       }
-
+      console.log("id user",userId);
+      await Messages.create({
+        message: { text:  "Tôi đã rời nhóm" }, 
+        users: [userId, groupId],
+        group: groupId,
+        sender: userId,
+        avatar: "https://www.shutterstock.com/shutterstock/photos/1311666263/display_1500/stock-vector-social-network-users-neon-icon-simple-thin-line-outline-vector-of-web-minimalistic-icons-for-ui-1311666263.jpg",
+      });
+  
       // Xóa người dùng khỏi nhóm
       group.members.splice(index, 1);
 
