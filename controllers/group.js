@@ -397,7 +397,11 @@ exports.transferOwnership = async (req, res, next) => {
                 message: "Người dùng mới không tồn tại",
             });
         }
-
+        const coLeaderIndex = group.coLeader.indexOf(newOwnerId);
+        if (coLeaderIndex !== -1) {
+          // Nếu người dùng là nhóm phó, loại bỏ người dùng khỏi mảng coLeader
+          group.coLeader.splice(coLeaderIndex, 1);
+        }
         // Cập nhật thông tin nhóm trưởng
         group.leader = newOwnerId;
         // Lưu thông tin nhóm đã được cập nhật
