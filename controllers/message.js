@@ -43,6 +43,7 @@ module.exports.forwardMessage = async (req, res, next) => {
           message: { text: message },
           users: [from, recipient],
           sender: from,
+          group: recipient,
         });
         
         // Kiểm tra kết quả và gửi phản hồi
