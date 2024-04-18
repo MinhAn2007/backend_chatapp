@@ -141,6 +141,7 @@ module.exports.getGroupMessages = async (req, res, next) => {
           group: msg.group,
           avatar: msg.avatar,
           name: sender.name, // Thay vì senderName
+          sender:sender,
       };
   }));
   
