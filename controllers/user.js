@@ -308,6 +308,7 @@ module.exports.acceptFriendRequestAndSendMessage = async (req, res, next) => {
       message: { text: defaultMessage },
       users: [sender._id.toString(), receiver._id.toString()],
       sender: sender._id,
+      avatar: sender.avatar,
     });
 
     if (messageData)
@@ -412,12 +413,16 @@ module.exports.rejectFriendRequest = async (req, res, next) => {
 
     // Kiểm tra xem người gửi và người nhận có tồn tại không
     if (!sender || !receiver) {
-      return res.status(404).json({ error: "Người gửi hoặc người nhận không tồn tại" });
+      return res
+        .status(404)
+        .json({ error: "Người gửi hoặc người nhận không tồn tại" });
     }
 
     // Kiểm tra xem người gửi có trong danh sách lời mời kết bạn của người nhận không
     if (!receiver.receivedFriendRequests.includes(sender._id)) {
-      return res.status(400).json({ error: "Người này không gửi lời mời kết bạn đến bạn" });
+      return res
+        .status(400)
+        .json({ error: "Người này không gửi lời mời kết bạn đến bạn" });
     }
 
     // Xóa người gửi khỏi danh sách lời mời kết bạn của người nhận
@@ -451,12 +456,14 @@ exports.unfriendUser = async (req, res, next) => {
 
     // Kiểm tra xem người dùng và bạn bè có tồn tại không
     if (!user || !friend) {
-      return res.status(404).json({ error: "Người dùng hoặc bạn bè không tồn tại" });
+      return res
+        .status(404)
+        .json({ error: "Người dùng hoặc bạn bè không tồn tại" });
     }
 
     // Xóa bạn bè khỏi danh sách bạn bè của người dùng và ngược lại
-    user.friends = user.friends.filter(f => f.toString() !== friendId);
-    friend.friends = friend.friends.filter(u => u.toString() !== userId);
+    user.friends = user.friends.filter((f) => f.toString() !== friendId);
+    friend.friends = friend.friends.filter((u) => u.toString() !== userId);
 
     // Lưu thông tin cập nhật vào cơ sở dữ liệu
     await Promise.all([user.save(), friend.save()]);
