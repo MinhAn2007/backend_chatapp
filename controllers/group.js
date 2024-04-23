@@ -130,10 +130,8 @@ exports.deleteGroup = async (req, res, next) => {
 };
 exports.addMembersToGroup = async (req, res, next) => {
   try {
-    const { groupId } = req.params; // Get group ID from request params
-    const { memberIds } = req.body; // Get an array of member IDs from request body
-
-    // Check if the group exists
+    const { groupId } = req.params; // Lấy ID của nhóm từ tham số yêu cầu
+    const { memberIds } = req.body; // Lấy mảng ID của thành viên từ phần thân của yêu cầu
     const group = await Group.findById(groupId);
     if (!group) {
       return res.status(404).json({
@@ -142,30 +140,27 @@ exports.addMembersToGroup = async (req, res, next) => {
       });
     }
 
-    // Loop through each member ID and add them to the group if they are not already a member
+    // Lặp qua từng ID thành viên và thêm họ vào nhóm nếu họ chưa là thành viên
     for (const memberId of memberIds) {
-      // Check if the member already exists in the group
       if (!group.members.includes(memberId)) {
-        // Add the member to the group
         group.members.push(memberId);
-
-        // Update the user's group information
         await updateUser(memberId, groupId);
+
+        // Tạo tin nhắn cho thành viên vừa được thêm vào nhóm
+        const user = await User.findById(memberId);
+        await Messages.create({
+          message: { text: `"${user.name}" đã được thêm vào nhóm` },
+          users: [memberId, groupId],
+          group: groupId,
+          sender: group.leader,
+          avatar: group.avatar,
+        });
+        console.log("avatar của leader", group.avatar);
       }
     }
-    await Messages.create({
-      message: { text: "Đã được thêm vào nhóm" },
-      users: [memberIds, groupId],
-      group: groupId,
-      sender: memberIds,
-      avatar:
-        "https://www.shutterstock.com/shutterstock/photos/1311666263/display_1500/stock-vector-social-network-users-neon-icon-simple-thin-line-outline-vector-of-web-minimalistic-icons-for-ui-1311666263.jpg",
-    });
 
-    // Save the updated group information
     await group.save();
 
-    // Return success response
     return res.status(200).json({
       success: true,
       message: "Members added to the group successfully",
@@ -267,10 +262,10 @@ exports.getGroupMembers = async (req, res, next) => {
 
 module.exports.removeMembersFromGroup = async (req, res, next) => {
   try {
-    const { groupId } = req.params; // Get group ID from request params
-    const { memberIds } = req.body; // Get an array of member IDs from request body
+    const { groupId } = req.params; // Lấy ID của nhóm từ tham số yêu cầu
+    const { memberIds } = req.body; // Lấy mảng ID của thành viên từ phần thân của yêu cầu
 
-    // Check if memberIds is an array
+    // Kiểm tra xem memberIds có phải là một mảng không
     if (!Array.isArray(memberIds)) {
       return res.status(400).json({
         success: false,
@@ -278,10 +273,10 @@ module.exports.removeMembersFromGroup = async (req, res, next) => {
       });
     }
 
-    // Find the group in the database by ID
+    // Tìm nhóm trong cơ sở dữ liệu theo ID
     const group = await Group.findById(groupId);
 
-    // Check if the group exists
+    // Kiểm tra xem nhóm có tồn tại không
     if (!group) {
       return res.status(404).json({
         success: false,
@@ -289,10 +284,10 @@ module.exports.removeMembersFromGroup = async (req, res, next) => {
       });
     }
 
-    // Calculate the number of members after removal
+    // Tính số lượng thành viên còn lại sau khi loại bỏ
     const remainingMembersCount = group.members.length - memberIds.length;
 
-    // Check if the remaining number of members would be less than 3
+    // Kiểm tra xem số lượng thành viên còn lại sẽ ít hơn 3 không
     if (remainingMembersCount < 3) {
       return res.status(400).json({
         success: false,
@@ -300,38 +295,33 @@ module.exports.removeMembersFromGroup = async (req, res, next) => {
       });
     }
 
-    // Loop through each member ID and remove them from the group
+    // Tạo tin nhắn cho mỗi thành viên bị xóa khỏi nhóm
     for (const memberId of memberIds) {
-      // Check if the member exists in the group
+      // Kiểm tra xem thành viên có tồn tại trong nhóm không
       const index = group.members.indexOf(memberId);
       if (index !== -1) {
-        // Remove the member from the group
+        // Loại bỏ thành viên khỏi nhóm
         group.members.splice(index, 1);
 
-        // Update the user's group information
+        // Cập nhật thông tin nhóm của người dùng
         await User.findByIdAndUpdate(memberId, { $pull: { groups: groupId } });
-      }
-    }
-    for (const memberId of memberIds) {
-      const coLeaderIndex = group.coLeader.indexOf(memberId);
-      if (coLeaderIndex !== -1) {
-        // Nếu người dùng là nhóm phó, loại bỏ người dùng khỏi mảng coLeader
-        group.coLeader.splice(coLeaderIndex, 1);
+
+        // Tạo tin nhắn thông báo cho thành viên bị xóa khỏi nhóm
+        const user = await User.findById(memberId);
+        await Messages.create({
+          message: { text: `"${user.name}" đã bị xóa khỏi nhóm` },
+          users: [memberId, groupId],
+          group: groupId,
+          sender: group.leader,
+          avatar: group.avatar,
+        });
       }
     }
 
-    await Messages.create({
-      message: { text: "Đã bị xóa khỏi nhóm" },
-      users: [memberIds, groupId],
-      group: groupId,
-      sender: memberIds,
-      avatar:
-        "https://www.shutterstock.com/shutterstock/photos/1311666263/display_1500/stock-vector-social-network-users-neon-icon-simple-thin-line-outline-vector-of-web-minimalistic-icons-for-ui-1311666263.jpg",
-    });
-    // Save the updated group information
+    // Lưu thông tin nhóm sau khi cập nhật
     await group.save();
 
-    // Return success response
+    // Trả về phản hồi thành công
     return res.status(200).json({
       success: true,
       message: "Members removed from the group successfully",
@@ -340,6 +330,7 @@ module.exports.removeMembersFromGroup = async (req, res, next) => {
     next(error);
   }
 };
+
 module.exports.setCoLeader = async (req, res, next) => {
   try {
     const { groupId, userId } = req.params; // Lấy ID của nhóm và ID của người dùng từ request params
@@ -386,12 +377,11 @@ module.exports.setCoLeader = async (req, res, next) => {
     group.coLeader.push(userId);
 
     await Messages.create({
-      message: { text: "Đã được làm nhóm phó" },
+      message: { text: `"${user.name}" đã trở thành nhóm phó` },
       users: [userId, groupId],
       group: groupId,
-      sender: userId,
-      avatar:
-        "https://www.shutterstock.com/shutterstock/photos/1311666263/display_1500/stock-vector-social-network-users-neon-icon-simple-thin-line-outline-vector-of-web-minimalistic-icons-for-ui-1311666263.jpg",
+      sender: group.leader,
+      avatar: group.avatar,
     });
 
     // Lưu thông tin nhóm đã được cập nhật
@@ -438,12 +428,11 @@ exports.transferOwnership = async (req, res, next) => {
     group.leader = newOwnerId;
 
     await Messages.create({
-      message: { text: "Đã được làm nhóm trưởng" },
+      message: { text: `"${newOwner.name}" đã trở thành nhóm trưởng` },
       users: [newOwnerId, groupId],
       group: groupId,
-      sender: newOwnerId,
-      avatar:
-        "https://www.shutterstock.com/shutterstock/photos/1311666263/display_1500/stock-vector-social-network-users-neon-icon-simple-thin-line-outline-vector-of-web-minimalistic-icons-for-ui-1311666263.jpg",
+      sender: group.leader,
+      avatar: group.avatar,
     });
     // Lưu thông tin nhóm đã được cập nhật
     await group.save();
@@ -518,8 +507,7 @@ exports.leaveGroup = async (req, res, next) => {
       users: [userId, groupId],
       group: groupId,
       sender: userId,
-      avatar:
-        "https://www.shutterstock.com/shutterstock/photos/1311666263/display_1500/stock-vector-social-network-users-neon-icon-simple-thin-line-outline-vector-of-web-minimalistic-icons-for-ui-1311666263.jpg",
+      avatar: group.avatar,
     });
 
     // Xóa người dùng khỏi nhóm
