@@ -1,4 +1,4 @@
-const User = require("../models/User.js"); // Import model User
+const User = require("../models/user"); // Import model User
 const bcrypt = require("bcrypt"); // Import thư viện bcrypt để mã hóa mật khẩu
 const multer = require("multer"); // Import thư viện multer để upload file
 const AWS = require("aws-sdk"); // Import thư viện aws-sdk để sử dụng AWS S3
