@@ -1,5 +1,5 @@
 const Messages = require("../models/Message.js");
-const User = require("../models/User.js");
+const User = require("../models/user");
 
 module.exports.getMessages = async (req, res, next) => {
   try {
