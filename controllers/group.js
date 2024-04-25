@@ -1,6 +1,6 @@
-const Group = require("../models/group");
-const User = require("../models/User.js");
-const Messages = require("../models/message.js");
+const Group = require("../models/Group.js");
+const User = require("../models/user");
+const Messages = require("../models/Message.js");
 module.exports.newGroups = async (req, res) => {
   const { name, creatorId, avatar, members } = req.body;
 

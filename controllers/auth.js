@@ -1,5 +1,4 @@
-const bcrypt = require('bcrypt');
-const User = require("../models/User.js");
+const User = require("../models/user");
 const jwt = require('jsonwebtoken');
 const OTP = require('../models/OTP');
 const otpGenerator = require("otp-generator");
@@ -39,11 +38,10 @@ exports.signup = async (req, res) => {
         }
 
         // Mã hóa mật khẩu
-        const hashedPassword = await bcrypt.hash(password, 10);
 
         // Tạo người dùng mới
         const newUser = await User.create({
-            name, email, password: hashedPassword, gender
+            name, email, password, gender
         });
 
         // Gửi email chứa mã OTP
@@ -97,7 +95,7 @@ exports.login = async (req, res) => {
         };
 
         // So sánh mật khẩu được nhập với mật khẩu đã được mã hóa trong cơ sở dữ liệu
-        if (await bcrypt.compare(password, foundUser.password)) {
+        if ((password, foundUser.password)) {
             // Tạo token JWT
             let token = jwt.sign(payload,
                 process.env.JWT_SECRET,

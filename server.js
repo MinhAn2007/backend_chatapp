@@ -56,12 +56,75 @@ const socketIo = require("socket.io")(server, {
     origin: "*",
   },
 });
+const roomIn = []; // Đối tượng lưu trữ danh sách người dùng trong mỗi phòng
+const socketId = [];
+const userIds = {}; // Đối tượng lưu trữ các userId đã tham gia vào phòng
+const alert = []; // Mảng lưu trữ thông báo
+const idUser = []; // Đối tượng lưu trữ các userId đã tham gia vào phòng
 
 socketIo.on("connection", (socket) => {
   console.log("New client connected" + socket.id);
-
   socket.emit("getId", socket.id);
+  socket.on("disconnect", () => {
+    socket.broadcast.emit("callEnded");
+  });
+  socket.on('joinRoom', ({ room, userId }) => {
+    // Thêm người dùng vào phòng
+    socket.join(room);
+    if (!roomIn[room]) {
+        roomIn[room] = {};
+    }
+  
+    // Kiểm tra xem userId đã tồn tại trong phòng chưa
+    if (userIds[room] && userIds[room][userId]) {
+        // Nếu userId đã tồn tại, không thêm vào mảng và cập nhật thông báo
+        alert[alert.length - 1] = `${socket.id} ${userId}`;
+    } else {
+        // Nếu userId là mới, thêm vào mảng và hiển thị thông báo mới
+        if (!userIds[room]) {
+            userIds[room] = {};
+        }
+        
+        // Kiểm tra xem userId đã tồn tại chưa
+        if (!userIds[room][userId]) {
+            userIds[room][userId] = true;
+            socketId.push(`${socket.id}`);
+            idUser.push(`${userId}`);
 
+            roomIn.push(userId + socket.id);
+        } else {
+            // Nếu userId đã tồn tại, thông báo lỗi
+            console.log("User ID đã tồn tại trong phòng.");
+            // Bạn có thể thực hiện các hành động khác ở đây, như gửi thông báo lỗi đến người dùng.
+        }
+    }
+    // Gửi thông tin phòng đến người dùng vừa tham gia
+
+    // Gửi danh sách người dùng trong phòng đến tất cả người dùng trong phòng
+  });
+  socketIo.to(socket.id).emit('roomInfo', roomIn); // Gửi thông tin phòng đến máy khách
+
+  socket.on('message', () => {
+    socketIo.to('common-room').emit('message', { idUser, socketId });});
+
+  socket.on("callUser", ({ userToCall, signalData, from, name }) => {
+
+    console.log("userToCall", userToCall);
+    console.log("signalData", signalData);
+    console.log("from", from);
+    console.log("name", name);
+    socketIo.to(userToCall).emit("callUser", { signal: signalData, from, name });
+    console.log("callUser", userToCall);
+  });
+
+  socket.on("answerCall", (data) => {
+    socketIo.to(data.to).emit("callAccepted", data.signal);
+  });
+
+  socket.on("endCall", ({ userToDisconnect }) => {
+    console.log("endCall", userToDisconnect);
+    socketIo.to(userToDisconnect).emit("callEnded");
+  });
   socket.on("sendDataClient", function (data) {
     console.log("gr", data);
     socketIo.emit("sendDataServer", { data });
