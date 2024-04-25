@@ -1,5 +1,4 @@
 const User = require("../models/user"); // Import model User
-const bcrypt = require("bcrypt"); // Import thư viện bcrypt để mã hóa mật khẩu
 const multer = require("multer"); // Import thư viện multer để upload file
 const AWS = require("aws-sdk"); // Import thư viện aws-sdk để sử dụng AWS S3
 const path = require("path"); // Import thư viện path để xử lý đường dẫn file
@@ -151,11 +150,9 @@ exports.updatePassword = async (req, res) => {
     }
 
     // Mã hóa mật khẩu mới
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
     // Cập nhật mật khẩu mới cho người dùng
-    foundUser.password = hashedPassword;
+    foundUser.password = newPassword;
     await foundUser.save();
 
     // Trả về thông báo thành công
@@ -190,10 +187,9 @@ exports.resetPassword = async (req, res) => {
     const newPassword = Math.random().toString(36).slice(-8);
 
     // Mã hóa mật khẩu mới
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // Cập nhật mật khẩu mới cho người dùng trong cơ sở dữ liệu
-    user.password = hashedPassword;
+    user.password = newPassword;
     await user.save();
 
     // Gửi email chứa mật khẩu mới cho người dùng
