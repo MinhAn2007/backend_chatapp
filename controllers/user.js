@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt"); // Import thư viện bcrypt để mã hóa m�
 const multer = require("multer"); // Import thư viện multer để upload file
 const AWS = require("aws-sdk"); // Import thư viện aws-sdk để sử dụng AWS S3
 const path = require("path"); // Import thư viện path để xử lý đường dẫn file
-const Messages = require("../models/message");
+const Messages = require("../models/Message");
 
 // Khởi tạo AWS S3
 process.env.AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE = "1";
