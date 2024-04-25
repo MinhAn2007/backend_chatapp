@@ -1,4 +1,4 @@
-const Group = require("../models/group");
+const Group = require("../models/Group.js");
 const User = require("../models/user");
 const Messages = require("../models/Message.js");
 module.exports.newGroups = async (req, res) => {
