@@ -22,12 +22,14 @@
     "express-list-endpoints": "^6.0.0",
     "http": "^0.0.1-security",
     "jsonwebtoken": "^9.0.0",
-    "mongoose": "^7.1.0",
     "multer": "^1.4.5-lts.1",
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.3",
     "nodemon": "^2.0.22",
     "otp-generator": "^4.0.1",
-    "socket.io": "^4.7.5"
+    "socket.io": "^4.7.5",
+    "mongodb": "latest",
+    "mongoose": "latest"
+
   }
 }
