@@ -13,7 +13,7 @@ const {
 
 const app = express();
 const PORT = process.env.PORT || 4000;
-
+ 
 require("dotenv").config(); // Load các biến môi trường từ file .env
 
 app.use(express.json()); // Sử dụng middleware để phân tích JSON gửi đến từ client
@@ -154,3 +154,4 @@ socketIo.on("connection", (socket) => {
     console.log("Client disconnected");
   });
 });
+module.exports = app;
