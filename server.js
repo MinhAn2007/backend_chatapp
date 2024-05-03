@@ -136,6 +136,10 @@ socketIo.on("connection", (socket) => {
   socket.on("transferLeader", function (data) {
     socketIo.emit("transferLeader", { data });
   });
+  socket.on("leaveGroup", function (data) {
+    console.log("leaveGroup", data);
+    socketIo.emit("leaveGroup", { data });
+  });
   socket.on("setCoLeader", function (data) {
     socketIo.emit("setCoLeader", { data });
   });
