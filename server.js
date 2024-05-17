@@ -65,6 +65,7 @@ const idUser = []; // Đối tượng lưu trữ các userId đã tham gia vào 
 socketIo.on("connection", (socket) => {
   console.log("New client connected" + socket.id);
   socket.emit("getId", socket.id);
+
   socket.on("disconnect", () => {
     socket.broadcast.emit("callEnded");
   });
@@ -135,6 +136,10 @@ socketIo.on("connection", (socket) => {
   });
   socket.on("transferLeader", function (data) {
     socketIo.emit("transferLeader", { data });
+  });
+  socket.on("leaveGroup", function (data) {
+    console.log("leaveGroup", data);
+    socketIo.emit("leaveGroup", { data });
   });
   socket.on("setCoLeader", function (data) {
     socketIo.emit("setCoLeader", { data });
