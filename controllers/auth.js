@@ -71,7 +71,6 @@ exports.signup = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        console.log(email, password);
         if (!email || !password) {
             return res.status(400).json({
                 success: false,
@@ -94,19 +93,20 @@ exports.login = async (req, res) => {
             email: foundUser.email,
             id: foundUser._id,
         };
-        console.log(foundUser.password === password, foundUser.password, password);
+
+        // So sánh mật khẩu được nhập với mật khẩu đã được mã hóa trong cơ sở dữ liệu
         if (password === foundUser.password) {
             // Tạo token JWT
             let token = jwt.sign(payload,
                 process.env.JWT_SECRET,
                 { expiresIn: "2h" }
             );
-
+        
             // Loại bỏ trường password khỏi thông tin người dùng trước khi trả về
             foundUser = foundUser.toObject();
             foundUser.token = token;
             foundUser.password = undefined;
-
+        
             // Trả về token và thông tin người dùng
             res.status(200).json({
                 success: true,

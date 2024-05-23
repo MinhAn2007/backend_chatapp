@@ -131,6 +131,7 @@ module.exports.getGroupMessages = async (req, res, next) => {
     }).sort({ updatedAt: 1 });
     const projectedMessages = await Promise.all(messages.map(async (msg) => {
       const sender = await User.findById(msg.sender).select('name');
+      const senderInfo = await User.findById(msg.sender)/////////
       console.log('Sender name:', sender.name); // Chỉnh lại thành sender.name
       return {
           id: msg._id,
@@ -142,6 +143,7 @@ module.exports.getGroupMessages = async (req, res, next) => {
           avatar: msg.avatar,
           name: sender.name, // Thay vì senderName
           sender:sender,
+          senderInfo:senderInfo,//////
       };
   }));
   
