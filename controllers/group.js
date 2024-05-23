@@ -241,6 +241,7 @@ exports.getGroupMembers = async (req, res, next) => {
           _id: user._id,
           name: user.name,
           role: role,
+          avatar: user.avatar,
         };
       })
     );
