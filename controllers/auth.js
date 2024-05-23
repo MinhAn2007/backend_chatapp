@@ -95,7 +95,7 @@ exports.login = async (req, res) => {
         };
 
         // So sánh mật khẩu được nhập với mật khẩu đã được mã hóa trong cơ sở dữ liệu
-        if ((password, foundUser.password)) {
+        if (password, foundUser.password) {
             // Tạo token JWT
             let token = jwt.sign(payload,
                 process.env.JWT_SECRET,
